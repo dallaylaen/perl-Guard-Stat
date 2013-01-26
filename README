@@ -2,19 +2,49 @@ Guard-Stat
 
 Guard::Stat - Guard object generator with utilisation meters.
 
+BASIC USAGE
 
+Suppose we have a long-running application making heavy use of closures,
+and need to monitor the lifetimes of those. So...
 
+    # in initial section
+    use Guard::Stat;
+    my $stat = Guard::Stat->new;
 
+    # when running
+    my $guard = $stat->guard;
+    my $callback = sub {
+        $guard->finish("taken route 1");
+        # now do useful stuff
+    };
+    # ... do whatever I need and call $callback eventually
 
-Meter table
+    # in diagnostic procedures started via external event
+    my $data = $stat->get_stat;
+    warn "$data->{running} instances still running";
 
-	done=*	done=0	done=1
+METER TABLE
+
+Statistics show numbers of guards for which finish()/DESTROY() were called
+in various combinations.
+
+	fin=*	fin=0	fin=1
 DEST=*	total+	?	finished+
 DEST=0	alive	running	zombie
 DEST=1	dead	broken+	complete+
 
-+marks values directly measured by Guard::Stat. All others are derived
-from these:
+A "+" marks values directly measured by Guard::Stat. All others are derived
+from these.
+
+TIME AND LEVELS
+
+The on_level( [-] $n, CODEFER ) method allows to perform certain actions
+upon guard count changes.
+
+With want_time => 1, get_times() method would provide a rough statistical
+distribution of callback lifetimes.
+
+See perldoc for more.
 
 INSTALLATION
 
