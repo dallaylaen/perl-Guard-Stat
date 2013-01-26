@@ -1,0 +1,8 @@
+Revision history for Guard-Stat
+
+0.01	Sat Jan 26 2013
+	Initial version open-sourced. Features:
+	* guard(), get_stat() - main functionality
+	* get_times() - guard lifetime statistics
+	* on_level() - set up callback for load change
+
