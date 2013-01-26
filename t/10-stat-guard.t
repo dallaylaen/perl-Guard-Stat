@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 17;
+use Test::More tests => 20;
 use Test::Exception;
 use Data::Dumper;
 use Time::HiRes qw(sleep);
@@ -36,7 +36,10 @@ is ($G->finished, 1, "1 done");
 
 is ($neg, 1, "on_level(-1) called once");
 
+is ($G->zombie, 1, "1 zombie");
 undef $g;
+is ($G->zombie, 0, "1 zombie gone");
+
 # note Dumper($G->get_time_stat);
 is ($G->alive, 1, "1 item alive");
 is ($neg, 1, "on_level(-1) called once");
@@ -56,3 +59,5 @@ is_deeply($stat->{results}, { ""=>1 }, "results as expected");
 my $stime = 0;
 $stime += $_ for values %{ $G->get_times };
 is ($stime, 2, "2 time measurements");
+
+is ($G->dead, $G->total, "All instances are dead");

@@ -33,7 +33,7 @@ and need to monitor the lifetimes of those. So...
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.0101';
 
 use Guard::Stat::Instance;
 
@@ -104,8 +104,12 @@ Both broken and zombie counts usually indicate something went wrong.
 
 =cut
 
-use Class::XSAccessor getters => {
-	(map { +$_ => $_; } @values),
+# create lots of identic subs
+foreach (@values) {
+	my $name = $_;
+	my $code = sub { return shift->{$name} };
+	no strict 'refs'; ## no critic
+	*$name = $code;
 };
 
 sub running {
@@ -115,6 +119,14 @@ sub running {
 sub alive {
 	my __PACKAGE__ $self = shift;
 	return $self->{total} - $self->{complete} - $self->{broken};
+};
+sub dead {
+	my __PACKAGE__ $self = shift;
+	return $self->{complete} + $self->{broken};
+};
+sub zombie {
+	my __PACKAGE__ $self = shift;
+	return $self->{finished} - $self->{complete};
 };
 
 =head2 guard()
