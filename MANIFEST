@@ -1,0 +1,14 @@
+Changes
+ignore.txt
+lib/Guard/Stat.pm
+lib/Guard/Stat/Instance.pm
+Makefile.PL
+MANIFEST
+MANIFEST.SKIP
+README
+t/00-load.t
+t/10-stat-guard.t
+t/boilerplate.t
+t/manifest.t
+t/pod-coverage.t
+t/pod.t
