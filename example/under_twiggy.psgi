@@ -7,7 +7,7 @@ use strict;
 
 # Then access the script:
 # http://localhost:<port>/stat for statustics
-# http://localhost:<port>/stat for time distribution
+# http://localhost:<port>/time for time distribution
 # http://localhost:<port>/ for random delay (0..1 sec)
 # http://localhost:<port>/?delay=<n.n> for specific delay
 
@@ -26,7 +26,7 @@ my $app = sub {
 
 	warn "Serving: $env->{REQUEST_URI}";
 
-	# Diagnostic uris /stat.* for statistics, /time.* for time distribution
+	# Diagnostic URLs /stat.* for statistics, /time.* for time distribution
 	if ($env->{REQUEST_URI} =~ /stat/) {
 		return [200, 
 			[ "Content-Type" => "text/plain" ],
@@ -37,8 +37,8 @@ my $app = sub {
 			[Dump($stat->get_times)]];
 	};
 
-	# The requests - sleep for random/specific time, then say OK
-	# so measure time from here!
+	# The requests - 200, sleep for random/specific time, EOF
+	# Only these are measured
 	my $guard = $stat->guard;
 	return sub {
 		my $answer = shift;
@@ -46,11 +46,13 @@ my $app = sub {
 
 		$env->{QUERY_STRING} =~ /delay=(\d+\.?\d*)/;
 		my $delay = $1 || rand();
-		my $timer; $timer=AE::timer $delay, undef, sub {
+
+		# Start AnyEvent timer
+		my $timer; $timer=AE::timer $delay, 0, sub {
 			$writer->write("OK $delay sec\n");
 			$writer->close;
 			$guard->finish();
 			undef $timer;
-		}; # end inner callback
-	}; # end callback
-};
+		}; # end timer callback
+	}; # end PSGI callback
+}; # end PSGI app
