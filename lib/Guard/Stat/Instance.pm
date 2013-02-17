@@ -5,11 +5,11 @@ package Guard::Stat::Instance;
 
 =head1 NAME
 
-Guard::Stat::instance - guard object base class. See L<Guard::Stat>.
+Guard::Stat::Instance - guard object base class. See L<Guard::Stat>.
 
 =cut
 
-our $VERSION = 0.01;
+our $VERSION = 0.0101;
 
 use Carp;
 use Time::HiRes qw(time);
@@ -48,7 +48,8 @@ sub new {
 
 =head2 finish ( [$result], ... )
 
-Mark guarded action as finished.
+Mark guarded action as finished. Finish may be called only once, subsequent
+calls only produce warnings.
 
 Passing $result will alter the 'result' statistics in owner.
 
