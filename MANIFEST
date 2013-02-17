@@ -13,3 +13,4 @@ t/manifest.t
 t/pod-coverage.t
 t/pod.t
 example/under_twiggy.psgi
+example/performance.pl
