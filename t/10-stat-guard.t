@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 20;
+use Test::More tests => 22;
 use Test::Exception;
 use Data::Dumper;
 use Time::HiRes qw(sleep);
@@ -27,7 +27,9 @@ is ($pos, 1, "on_level(2) called once");
 is ($neg, 0, "on_level(-1) not called yet");
 
 # sleep 0.001;
+ok (!$g->is_done, "is_done = 0");
 $g->finish;
+ok ($g->is_done, "is_done = 1");
 
 note Dumper($G->get_stat);
 

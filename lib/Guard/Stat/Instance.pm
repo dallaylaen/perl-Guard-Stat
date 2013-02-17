@@ -9,7 +9,7 @@ Guard::Stat::Instance - guard object base class. See L<Guard::Stat>.
 
 =cut
 
-our $VERSION = 0.0101;
+our $VERSION = 0.0102;
 
 use Carp;
 use Time::HiRes qw(time);
@@ -38,7 +38,10 @@ sub new {
 	my $class = shift;
 	my %opt = @_;
 
-	my __PACKAGE__ $self = fields::new($class);
+#	my __PACKAGE__ $self = fields::new($class);
+
+	# fields::new is removed as it consumes too much CPU time
+	my __PACKAGE__ $self = bless {}, $class;
 	exists $opt{$_} and $self->{$_} = $opt{$_} for qw(id owner);
 	$opt{want_time} and $self->{start} = time;
 
@@ -72,6 +75,17 @@ sub finish {
 		$msg .= "; id = $self->{id}" if $self->{id};
 		carp $msg;
 	};
+};
+
+=head2 is_done
+
+Tell if finish() was called on this particular guard.
+
+=cut
+
+sub is_done {
+	my $self = shift;
+	return $self->{done};
 };
 
 sub DESTROY {

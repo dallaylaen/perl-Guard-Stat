@@ -13,3 +13,4 @@ pod2htm*.tmp
 Guard-Stat-*
 META.*
 MYMETA.*
+nytprof*
