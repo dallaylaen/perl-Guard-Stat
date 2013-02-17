@@ -6,7 +6,7 @@ package Guard::Stat;
 
 =head1 NAME
 
-Guard::Stat - Guard object generator with utilisation meters.
+Guard::Stat - Create guard objects and gather usage statistics from those.
 
 =head1 SYNOPSIS
 
@@ -23,17 +23,56 @@ and need to monitor the lifetimes of those. So...
         $guard->finish("taken route 1");
         # now do useful stuff
     };
-    # ... do whatever I need and call $callback eventually
+    # ... do whatever we need and call $callback eventually
 
-    # in diagnostic procedures started via external event
+    # in diagnostic procedures triggered by an external event
     my $data = $stat->get_stat;
-    warn "$data->{running} instances still running";
+    warn "$data->{running} callbacks still waiting to be executed";
+
+=head1 DESCRIPTION
+
+=head2 The classes
+
+Guard::Stat is a long-lived object that spawns guards and
+gathers statistical information.
+
+Guard::Stat::Instance is the guard. When it is DESTROYed, it signals the stat
+object which created it.
+
+=head2 The counters
+
+When a guard is created, the C<total> counter increases. When it's detroyed,
+C<dead> counter increases. C<alive> = C<total> - C<dead> is the number of
+guards that still exist.
+
+Additionally, guards implement a C<finish()> method which indicates that
+the action associates with the guard is complete. Typically a guard should
+be destroyed soon afterwards. The guards for which neither DESTROY nor
+finish were called are considered C<running> (see below for a full list
+of statistics).
+
+=head2 Time distribution
+
+Guard::Stat also provides access to guard lifetimes, if given C<want_time=true>
+at creation time. As storing all data is too generous and average values
+may be misleading, a rough logarithmic scale with guaranteed error ratio is
+provided.
+
+See C<get_times> below.
+
+=head2 Running count callback
+
+Whenever number of guards in the C<running> state passes given level,
+a function may be called. This can be used to monitor load, prevent
+uncontrolled memory usage growth, etc.
+
+See C<on_level> below.
 
 =head1 METHODS
 
 =cut
 
-our $VERSION = '0.0101';
+our $VERSION = '0.0102';
 
 use Guard::Stat::Instance;
 
@@ -79,28 +118,30 @@ sub new {
 
 =head2 Statistics
 
+The following getters represent numbers of guards in respective states:
+
 =over
 
-=item * total - all guards ever created;
+=item * total() - all guards ever created;
 
-=item * dead - DESTROY was called;
+=item * dead() - DESTROY was called;
 
-=item * alive - DESTROY was NOT called;
+=item * alive() - DESTROY was NOT called;
 
-=item * finished - finish() was called;
+=item * finished() - finish() was called;
 
-=item * complete - both finish() and DESTROY were called;
+=item * complete() - both finish() and DESTROY were called;
 
-=item * zombie - finish() was called, but not DESTROY;
+=item * zombie() - finish() was called, but not DESTROY;
 
-=item * running - neither finish() nor DESTROY called;
+=item * running() - neither finish() nor DESTROY called;
 
-=item * broken - number of guards for which DESTROY was called,
+=item * broken() - number of guards for which DESTROY was called,
 but NOT finish().
 
-Both broken and zombie counts usually indicate something went wrong.
-
 =back
+
+Growing broken and/or zombie counts usually indicate something went wrong.
 
 =cut
 
@@ -175,7 +216,8 @@ when number of running guard instances is increased to $n.
 
 If $n is negative or 0, run CODEREF->($n) when it is decreased to $n.
 
-Normally, CODEREF should not die as it may be called within destructor.
+CAVEAT: Normally, CODEREF should not die as it may be called within
+a destructor.
 
 =cut
 
@@ -300,9 +342,6 @@ Please report any bugs or feature requests to C<bug-guard-stat at rt.cpan.org>, 
 the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Guard-Stat>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
-
-
-
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
@@ -313,6 +352,10 @@ You can find documentation for this module with the perldoc command.
 You can also look for information at:
 
 =over 4
+
+=item * Github:
+
+L<https://github.com/dallaylaen/perl-Guard-Stat>
 
 =item * RT: CPAN's request tracker (report bugs here)
 
@@ -332,9 +375,16 @@ L<http://search.cpan.org/dist/Guard-Stat/>
 
 =back
 
+=head1 SEE ALSO
 
-=head1 ACKNOWLEDGEMENTS
+L<AnyEvent> - This module was initially created for monitoring callback
+usage in AnyEvent-driven application.
 
+L<Twiggy> - A single-threaded web-server handling multiple simultaneous
+requests is probably the most natural environment for callback counting. See
+C<example/under_twiggy.psgi> in this distribution.
+
+L<Devel::Leak::Cb> - Another module for finding leaked callbacks.
 
 =head1 LICENSE AND COPYRIGHT
 
@@ -345,7 +395,6 @@ under the terms of either: the GNU General Public License as published
 by the Free Software Foundation; or the Artistic License.
 
 See http://dev.perl.org/licenses/ for more information.
-
 
 =cut
 
