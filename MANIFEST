@@ -14,3 +14,4 @@ t/pod-coverage.t
 t/pod.t
 example/under_twiggy.psgi
 example/performance.pl
+example/command_line.pl
