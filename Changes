@@ -1,6 +1,6 @@
 Revision history for Guard-Stat
 
-0.0203	Fri Jul 5 2013
+0.0204	Fri Jul 5 2013
 	* Major rewrite, time_stat now available extra module, methods renamed
 
 0.0102	Sun Feb 17 2013

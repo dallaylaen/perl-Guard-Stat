@@ -1,6 +1,5 @@
 use strict;
 use warnings;
-use 5.010;
 
 package Guard::Stat;
 
@@ -76,7 +75,7 @@ See C<on_level> below.
 
 =cut
 
-our $VERSION = 0.0203;
+our $VERSION = 0.0204;
 
 use Carp;
 use Guard::Stat::Instance;
@@ -278,7 +277,7 @@ sub add_stat_new {
 sub add_stat_end {
 	my __PACKAGE__ $self = shift;
 	my ($guard, $result, @rest) = @_;
-	$result //= "";
+	$result = "" unless defined $result;
 
 	$self->{finished}++;
 	$self->{results}{$result}++;
