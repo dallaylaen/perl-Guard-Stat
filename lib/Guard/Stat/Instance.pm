@@ -9,12 +9,13 @@ Guard::Stat::Instance - guard object base class. See L<Guard::Stat>.
 
 =cut
 
-our $VERSION = 0.02;
+our $VERSION = 0.0201;
 
 use Carp;
 use Time::HiRes qw(time);
 
-use fields qw(owner start done id);
+# use fields qw(owner start done id);
+# fields removed - not portable
 
 =head2 new (%options)
 
@@ -39,8 +40,8 @@ sub new {
 	my %opt = @_;
 
 #	my __PACKAGE__ $self = fields::new($class);
-
 	# fields::new is removed as it consumes too much CPU time
+
 	my __PACKAGE__ $self = bless {}, $class;
 	$self->{owner} = $opt{owner};
 	$opt{want_time} and $self->{start} = time;
