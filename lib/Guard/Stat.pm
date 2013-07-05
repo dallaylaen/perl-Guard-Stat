@@ -31,7 +31,14 @@ So we put a guard into each closure to update the statistics:
     my $data = $stat->get_stat;
     warn "$data->{running} callbacks still waiting to be executed";
 
+Of course, alive/dead counts of any objects (not only sub refs) may be
+monitored in a similar way.
+
 =head1 DESCRIPTION
+
+A guard is a special object that does something useful in destructor, typically
+freeing a resource or lock. These guards however don't free anything. Instead,
+they merely keep their master (YOU) informed.
 
 =head2 The classes
 
@@ -69,7 +76,7 @@ See C<on_level> below.
 
 =cut
 
-our $VERSION = 0.0201;
+our $VERSION = 0.0202;
 
 use Guard::Stat::Instance;
 
@@ -84,6 +91,10 @@ use fields qw(time_stat results on_level), @values;
 
 =over
 
+=item * time_stat - an object or class to store time statistics. The class
+should support C<new> and C<add_data( $number )> operations for this to work.
+Suitable candidates are L<Statistics::Descriptive::Sparse> and
+L<Statistics::Descriptive::LogScale> (both have sublinear memory usage).
 
 =back
 
@@ -342,8 +353,8 @@ L<http://search.cpan.org/dist/Guard-Stat/>
 This module was initially written as part of my day job at
 L<http://sms-online.com>.
 
-Vadim Vlasov L<https://github.com/scripter-v> was the first tester of the
-package, and proposed the C<zombie> counter.
+Vadim Vlasov was the first user of this package, and proposed
+the C<zombie> counter.
 
 =head1 SEE ALSO
 
