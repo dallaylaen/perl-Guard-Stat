@@ -1,14 +1,14 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 22;
+use Test::More tests => 21;
 use Test::Exception;
 use Data::Dumper;
 use Time::HiRes qw(sleep);
 
 use Guard::Stat;
 
-my $G = Guard::Stat->new( want_time => 1 );
+my $G = Guard::Stat->new( );
 lives_ok {
 	$G->get_stat;
 } "get_stat() is OK on empty guard";
@@ -28,7 +28,7 @@ is ($neg, 0, "on_level(-1) not called yet");
 
 # sleep 0.001;
 ok (!$g->is_done, "is_done = 0");
-$g->finish;
+$g->end;
 ok ($g->is_done, "is_done = 1");
 
 note Dumper($G->get_stat);
@@ -54,12 +54,8 @@ is ($neg, 1, "on_level(-1) called once");
 
 note Dumper($G->get_stat);
 
-my $stat = $G->get_stat;
-is (ref $stat->{results}, 'HASH', "Fetched results");
-is_deeply($stat->{results}, { ""=>1 }, "results as expected");
-
-my $stime = 0;
-$stime += $_ for values %{ $G->get_times };
-is ($stime, 2, "2 time measurements");
+my $results = $G->get_stat_result;
+is (ref $results, 'HASH', "Fetched results");
+is_deeply($results, { ""=>1 }, "results as expected");
 
 is ($G->dead, $G->total, "All instances are dead");

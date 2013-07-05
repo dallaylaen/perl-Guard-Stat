@@ -25,7 +25,7 @@ my %g; # guards
 my %action = (
 	c => sub { $g{$_[0]} = $st->guard },
 	d => sub { delete $g{$_[0]} },
-	f => sub { $g{$_[0]}->finish( $_[1] ) },
+	f => sub { $g{$_[0]}->end( $_[1] ) },
 	q => sub { exit },
 	s => sub { my_print( Dumper ($st->get_stat)) },
 	l => sub { my_print(

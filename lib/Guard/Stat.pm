@@ -6,12 +6,14 @@ package Guard::Stat;
 
 =head1 NAME
 
-Guard::Stat - Create guard objects and gather usage statistics from those.
+Guard::Stat - Create guard objects and gather averall usage statistics from them.
 
 =head1 SYNOPSIS
 
 Suppose we have a long-running application making heavy use of closures,
-and need to monitor the lifetimes of those. So...
+and need to monitor the number of executed, not executed, and gone subrefs.
+
+So we put a guard into each closure to update the statistics:
 
     # in initial section
     use Guard::Stat;
@@ -51,15 +53,6 @@ be destroyed soon afterwards. The guards for which neither DESTROY nor
 finish were called are considered C<running> (see below for a full list
 of statistics).
 
-=head2 Time distribution
-
-Guard::Stat also provides access to guard lifetimes, if given C<want_time=true>
-at creation time. As storing all data is too generous and average values
-may be misleading, a rough logarithmic scale with guaranteed error ratio is
-provided.
-
-See C<get_times> below.
-
 =head2 Running count callback
 
 Whenever number of guards in the C<running> state passes given level,
@@ -72,17 +65,14 @@ See C<on_level> below.
 
 =cut
 
-our $VERSION = '0.0102';
+our $VERSION = 0.02;
 
 use Guard::Stat::Instance;
 
 my @values;
 BEGIN { @values = qw( total finished complete broken ) };
 
-use fields
-	qw(times want_time results on_level),
-	@values,
-	qw(log_base grades min_time);
+use fields qw(time_stat results on_level), @values;
 
 =head2 new (%options)
 
@@ -90,10 +80,6 @@ use fields
 
 =over
 
-=item * want_time - gather guard lifetime statistics. See C<get_times>.
-
-=item * log_base, grades, min_time - configure time statistics.
-See C<get_times>.
 
 =back
 
@@ -103,15 +89,12 @@ sub new {
 	my $class = shift;
 	my %opt = @_;
 
-	$opt{log_base} ||= 10;
-	$opt{grades} ||= 10;
-	$opt{min_time} ||= 10**-6;
-
 	my $self = fields::new($class);
-	exists $opt{$_} and $self->{$_} = $opt{$_}
-		for qw(log_base grades min_time want_time);
+	if ( my $stat = $opt{time_stat} ) {
+		$self->{time_stat} = ref $stat ? $stat : $stat->new;
+	};
+
 	$self->{$_} = 0 for @values;
-	$self->{times} = [0];
 
 	return $self;
 };
@@ -179,10 +162,11 @@ Create a guard object.
 sub guard {
 	my __PACKAGE__ $self = shift;
 	my %opt = @_;
+
 	return Guard::Stat::Instance->new(
 		%opt,
-		want_time => $self->{want_time},
 		owner => $self,
+		want_time => $self->{time_stat} ? 1 : 0,
 	);
 };
 
@@ -203,10 +187,31 @@ sub get_stat {
 	$ret{alive} = $ret{total} - $ret{dead};
 	$ret{running} = $ret{alive} - $ret{zombie};
 
-	$ret{results} = { %{$self->{results} || {}} };
-		# deep copy - keep encapsulation
-
 	return \%ret;
+};
+
+=head2 get_stat_result
+
+Provide statistics on agruments provided to end() method.
+
+=cut
+
+sub get_stat_result {
+	my __PACKAGE__ $self = shift;
+
+	my %ret = %{ $self->{results} };
+	return \%ret;
+};
+
+=head2 get_stat_time
+
+Return time statistics object, if any.
+
+=cut
+
+sub get_stat_time {
+	my __PACKAGE__ $self = shift;
+	return $self->{time_stat};
 };
 
 =head2 on_level( $n, CODEREF )
@@ -229,8 +234,24 @@ sub on_level {
 };
 
 
-# Guard instance callbacks
-sub _start {
+=head1 Guard instance callbacks
+
+The following methods are called by the guard object in different stages of
+its life. They should NOT be called directly (unless there's a need to fool
+the stat object) and are only described for people who want to extend
+the instance object.
+
+=head2 add_stat_new( $guard )
+
+=head2 add_stat_end( $guard, [ $result ])
+
+=head2 add_stat_destroy( $guard, $end_was_called )
+
+=head2 add_stat_time( $time )
+
+=cut
+
+sub add_stat_new {
 	my __PACKAGE__ $self = shift;
 	$self->{total}++;
 	my $running = $self->running;
@@ -239,7 +260,7 @@ sub _start {
 	};
 };
 
-sub _finish {
+sub add_stat_end {
 	my __PACKAGE__ $self = shift;
 	my ($guard, $result, @rest) = @_;
 	$result //= "";
@@ -253,83 +274,22 @@ sub _finish {
 	};
 };
 
-# called on DESTROY if finish() called
-sub _complete {
-	my __PACKAGE__ $self = shift;
-	$self->{complete}++;
-};
+sub add_stat_destroy {
+	my $self = shift;
+	my ($guard, $is_done) = @_;
 
-# called on DESTROY if finish() NOT called
-sub _broken {
-	my __PACKAGE__ $self = shift;
-	$self->{broken}++;
-};
-
-sub _add_time {
-	my __PACKAGE__ $self = shift;
-	my ($elapsed) = @_;
-
-	my ($base, $grades, $floor) = @$self{qw(log_base grades min_time)};
-	my $logtime = $elapsed
-		? int(0.5 + $grades * log( $elapsed / $floor ) / log($base))
-		: -1;
-	if ($logtime < 0) {
-		$logtime = 0;
+	if ($is_done) {
+		$self->{complete}++;
 	} else {
-		$logtime++;
+		$self->{broken}++;
 	};
-	$self->{times}[$logtime]++;
 };
 
-=head2 get_times
-
-Get time statistics as a hashref of
-{ 0 => count0, approx_time1 => count1, approx_time2 => count2, ... }.
-
-If want_time => 1 option is given to new, all guards will memoize the time of
-their creation (via Time::HiRes::time) and send it back on finish()/DESTROY
-(whichever comes first, but only once per guard).
-
-Since average values are meaningless, and precise distribution will take up too
-much memory, the following approach is used.
-
-All received times are divided into fixed logarithmic buckets. For each bucket,
-a hit count is held. These values can be then used to study the distribution,
-i.e. build centiles, find peaks, and calculate average and dispersion.
-
-Of cource, those numbers would be imprecise by a factor of bucket width,
-but this is probably OK for performance analysis.
-
-The following values are used to define the buckets:
-
-=over
-
-=item * min_time - all times below this are considered to be miniscule
-and add up to the 0th bucket. Default: 10**-6 (1 us).
-
-=item * log_base - logarithm base for calculating further buckets. Default: 10
-
-=item * grades - number of buckets per base.  Default: 10
-
-=back
-
-The bucket width is equal to (log_base ** (1/grades)). base and grades are
-only separated for convenience.
-
-=cut
-
-sub get_times {
+sub add_stat_time {
 	my __PACKAGE__ $self = shift;
-
-	my ($base, $grades, $floor) = @$self{qw(log_base grades min_time)};
-	my %ret;
-	for (my $i = @{ $self->{times} }; $i-->1; ) {
-		my $count = $self->{times}[$i] or next;
-		my $key = sprintf "%0.3g", $base**(($i-1) / $grades) * $floor;
-		$ret{$key} = $count;
-	};
-	$ret{0} = $self->{times}[0] // 0;
-	return \%ret;
+	my $t = shift;
+	return unless $self->{time_stat};
+	$self->{time_stat}->add_data($t);
 };
 
 =head1 AUTHOR

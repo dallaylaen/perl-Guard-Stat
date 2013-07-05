@@ -51,7 +51,7 @@ my $app = sub {
 		my $timer; $timer=AE::timer $delay, 0, sub {
 			$writer->write("OK $delay sec\n");
 			$writer->close;
-			$guard->finish();
+			$guard->end();
 			undef $timer;
 		}; # end timer callback
 	}; # end PSGI callback

@@ -9,7 +9,7 @@ Guard::Stat::Instance - guard object base class. See L<Guard::Stat>.
 
 =cut
 
-our $VERSION = 0.0102;
+our $VERSION = 0.02;
 
 use Carp;
 use Time::HiRes qw(time);
@@ -42,14 +42,14 @@ sub new {
 
 	# fields::new is removed as it consumes too much CPU time
 	my __PACKAGE__ $self = bless {}, $class;
-	exists $opt{$_} and $self->{$_} = $opt{$_} for qw(id owner);
+	$self->{owner} = $opt{owner};
 	$opt{want_time} and $self->{start} = time;
 
-	$self->{owner}->_start($self);
+	$self->{owner}->add_stat_new($self);
 	return $self;
 };
 
-=head2 finish ( [$result], ... )
+=head2 end ( [$result], ... )
 
 Mark guarded action as finished. Finish may be called only once, subsequent
 calls only produce warnings.
@@ -58,20 +58,19 @@ Passing $result will alter the 'result' statistics in owner.
 
 =cut
 
-sub finish {
+sub end {
 	my __PACKAGE__ $self = shift;
 
 	if (!$self->{done}++) {
 	  return unless $self->{owner};
-		$self->{owner}->_finish($self, @_);
-		$self->{owner}->_add_time(time - $self->{start})
-			if (defined $self->{start});
-	} else {
-		my $msg = "twice";
-		if ($self->{done} == 2) {
-			$msg = "once";
+		$self->{owner}->add_stat_end($self, @_);
+		# guarantee time is only written once
+		if (defined (my $t = delete $self->{start})) {
+			$self->{owner}->add_stat_time(time - $t);
 		};
-		$msg = "Guard::Stat: finish() called more than $msg";
+	} else {
+		my $msg = $self->{done} == 2 ? "once" : "twice";
+		$msg = "Guard::Stat: end() called more than $msg";
 		$msg .= "; id = $self->{id}" if $self->{id};
 		carp $msg;
 	};
@@ -91,13 +90,10 @@ sub is_done {
 sub DESTROY {
 	my $self = shift;
 	return unless $self->{owner};
-	if (!$self->{done}) {
-		$self->{owner}->_add_time(time - $self->{start})
-			if (defined $self->{start});
-		$self->{owner}->_broken($self);
-	} else {
-		$self->{owner}->_complete($self);
-	};
+
+	$self->{owner}->add_stat_destroy($self, $self->{done});
+	$self->{owner}->add_stat_time(time - $self->{start})
+		if (defined $self->{start});
 };
 
 =head1 AUTHOR

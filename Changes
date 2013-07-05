@@ -1,5 +1,12 @@
 Revision history for Guard-Stat
 
+0.02	Fri Jul 5 2013
+	* Major rewrite, time_stat split off, methods renamed
+
+0.0102	Sun Feb 17 2013
+	* Improved docs
+	* Improved performance
+
 0.01	Sat Jan 26 2013
 	Initial version open-sourced. Features:
 	* guard(), get_stat() - main functionality
