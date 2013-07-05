@@ -38,8 +38,12 @@ So we put a guard into each closure to update the statistics:
 Guard::Stat is a long-lived object that spawns guards and
 gathers statistical information.
 
+Its public methods are guard() and various statistic getters.
+
 Guard::Stat::Instance is the guard. When it is DESTROYed, it signals the stat
 object which created it.
+
+Its public methods are end( [$result] ) and is_done().
 
 =head2 The counters
 
@@ -47,10 +51,10 @@ When a guard is created, the C<total> counter increases. When it's detroyed,
 C<dead> counter increases. C<alive> = C<total> - C<dead> is the number of
 guards that still exist.
 
-Additionally, guards implement a C<finish()> method which indicates that
+Additionally, guards implement a C<end()> method which indicates that
 the action associates with the guard is complete. Typically a guard should
 be destroyed soon afterwards. The guards for which neither DESTROY nor
-finish were called are considered C<running> (see below for a full list
+end were called are considered C<running> (see below for a full list
 of statistics).
 
 =head2 Running count callback
@@ -65,7 +69,7 @@ See C<on_level> below.
 
 =cut
 
-our $VERSION = 0.02;
+our $VERSION = 0.0201;
 
 use Guard::Stat::Instance;
 
@@ -111,16 +115,16 @@ The following getters represent numbers of guards in respective states:
 
 =item * alive() - DESTROY was NOT called;
 
-=item * finished() - finish() was called;
+=item * finished() - end() was called;
 
-=item * complete() - both finish() and DESTROY were called;
+=item * complete() - both end() and DESTROY were called;
 
-=item * zombie() - finish() was called, but not DESTROY;
+=item * zombie() - end() was called, but not DESTROY;
 
-=item * running() - neither finish() nor DESTROY called;
+=item * running() - neither end() nor DESTROY called;
 
 =item * broken() - number of guards for which DESTROY was called,
-but NOT finish().
+but NOT end().
 
 =back
 
@@ -173,8 +177,6 @@ sub guard {
 =head2 get_stat
 
 Get all statistics as a single hashref.
-
-This also includes results - a hash of counts of first argument to finish().
 
 =cut
 
@@ -335,10 +337,18 @@ L<http://search.cpan.org/dist/Guard-Stat/>
 
 =back
 
+=head1 ACKNOWLEDGEMENTS
+
+This module was initially written as part of my day job at
+L<http://sms-online.com>.
+
+Vadim Vlasov L<https://github.com/scripter-v> was the first tester of the
+package, and proposed the C<zombie> counter.
+
 =head1 SEE ALSO
 
-L<AnyEvent> - This module was initially created for monitoring callback
-usage in AnyEvent-driven application.
+L<AnyEvent> - This module was created for monitoring callback
+usage in AnyEvent-driven application. However, it allows for a broadeer usage.
 
 L<Twiggy> - A single-threaded web-server handling multiple simultaneous
 requests is probably the most natural environment for callback counting. See
