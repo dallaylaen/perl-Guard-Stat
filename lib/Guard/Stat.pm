@@ -76,8 +76,9 @@ See C<on_level> below.
 
 =cut
 
-our $VERSION = 0.0202;
+our $VERSION = 0.0203;
 
+use Carp;
 use Guard::Stat::Instance;
 
 my @values;
@@ -106,9 +107,10 @@ sub new {
 
 	my $self = fields::new($class);
 	if ( my $stat = $opt{time_stat} ) {
+		$stat->can("add_data")
+			or croak( __PACKAGE__.": time_stat object $stat doesn't have add_data() method" );
 		$self->{time_stat} = ref $stat ? $stat : $stat->new;
 	};
-
 	$self->{$_} = 0 for @values;
 
 	return $self;

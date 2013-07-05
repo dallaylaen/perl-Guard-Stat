@@ -8,10 +8,11 @@ MANIFEST.SKIP
 README
 t/00-load.t
 t/10-stat-guard.t
-t/boilerplate.t
-t/manifest.t
-t/pod-coverage.t
-t/pod.t
+xt/boilerplate.t
+xt/manifest.t
+xt/pod-coverage.t
+xt/pod.t
 example/under_twiggy.psgi
 example/performance.pl
 example/command_line.pl
+t/11-time-stat.t
