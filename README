@@ -14,7 +14,7 @@ and need to monitor the lifetimes of those. So...
     # when running
     my $guard = $stat->guard;
     my $callback = sub {
-        $guard->finish("taken route 1");
+        $guard->end("taken route 1");
         # now do useful stuff
     };
     # ... do whatever I need and call $callback eventually
@@ -25,7 +25,7 @@ and need to monitor the lifetimes of those. So...
 
 METER TABLE
 
-Statistics show numbers of guards for which finish()/DESTROY() were called
+Statistics show numbers of guards for which end()/DESTROY() were called
 in various combinations.
 
 	fin=*	fin=0	fin=1
@@ -33,16 +33,15 @@ DEST=*	total+	?	finished+
 DEST=0	alive	running	zombie
 DEST=1	dead	broken+	complete+
 
-A "+" marks values directly measured by Guard::Stat. All others are derived
-from these.
+A "+" marks values directly measured by Guard::Stat. They all are monotonous.
+All others are derived from these.
 
 TIME AND LEVELS
 
 The on_level( [-] $n, CODEFER ) method allows to perform certain actions
-upon guard count changes.
+upon guard count changes. (-$n means "count decreased to $n").
 
-With want_time => 1, get_times() method would provide a rough statistical
-distribution of callback lifetimes.
+With a helper class provided, also life times of guards can be measured.
 
 See perldoc for more.
 
