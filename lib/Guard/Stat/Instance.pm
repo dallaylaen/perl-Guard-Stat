@@ -9,12 +9,12 @@ Guard::Stat::Instance - guard object base class. See L<Guard::Stat>.
 
 =cut
 
-our $VERSION = 0.0202;
+our $VERSION = 0.0203;
 
 use Carp;
 use Time::HiRes qw(time);
 
-# use fields qw(owner start done id);
+# use fields qw(owner start done);
 # fields removed - not portable
 
 =head2 new (%options)
@@ -28,8 +28,6 @@ Options may include:
 =item * owner - the calling Guard::Stat object.
 
 =item * want_time - whether to track execution times.
-
-=item * id - optional context identifier.
 
 =back
 
@@ -46,7 +44,6 @@ sub new {
 	$self->{owner} = $opt{owner};
 	$opt{want_time} and $self->{start} = time;
 
-	$self->{owner}->add_stat_new();
 	return $self;
 };
 
@@ -72,7 +69,6 @@ sub end {
 	} else {
 		my $msg = $self->{done} == 2 ? "once" : "twice";
 		$msg = "Guard::Stat: end() called more than $msg";
-		$msg .= "; id = $self->{id}" if $self->{id};
 		carp $msg;
 	};
 };

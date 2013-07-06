@@ -24,4 +24,12 @@ sub new { return bless {}, shift; };
 
 package My::FakeTime;
 BEGIN{ our @ISA = qw(My::Fake); };
-sub add_data { shift->{count}++ };
+sub add_data {
+	my $self = shift;
+	my $time = shift;
+
+	$self->{count}++;
+	die ("Bad time $time") unless $time > 0;
+	use Test::More;
+	note $time;
+};

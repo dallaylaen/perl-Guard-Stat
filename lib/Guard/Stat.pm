@@ -75,7 +75,7 @@ See C<on_level> below.
 
 =cut
 
-our $VERSION = 0.0205;
+our $VERSION = 0.0206;
 
 use Carp;
 use Guard::Stat::Instance;
@@ -180,11 +180,17 @@ sub guard {
 	my __PACKAGE__ $self = shift;
 	my %opt = @_;
 
-	return $self->{guard_class}->new(
+	my $g = $self->{guard_class}->new(
 		%opt,
 		owner => $self,
 		want_time => $self->{time_stat} ? 1 : 0,
 	);
+	$self->{total}++;
+	my $running = $self->running;
+	if (my $code = $self->{on_level}{$running}) {
+		$code->($running, $self);
+	};
+	return $g;
 };
 
 =head2 get_stat
@@ -256,8 +262,6 @@ its life. They should NOT be called directly (unless there's a need to fool
 the stat object) and are only described for people who want to extend
 the instance object.
 
-=head2 add_stat_new( $guard )
-
 =head2 add_stat_end( $guard, [ $result ])
 
 =head2 add_stat_destroy( $guard, $end_was_called )
@@ -265,15 +269,6 @@ the instance object.
 =head2 add_stat_time( $time )
 
 =cut
-
-sub add_stat_new {
-	my __PACKAGE__ $self = shift;
-	$self->{total}++;
-	my $running = $self->running;
-	if (my $code = $self->{on_level}{$running}) {
-		$code->($running, $self);
-	};
-};
 
 sub add_stat_end {
 	my __PACKAGE__ $self = shift;
