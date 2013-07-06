@@ -75,7 +75,7 @@ See C<on_level> below.
 
 =cut
 
-our $VERSION = 0.0204;
+our $VERSION = 0.0205;
 
 use Carp;
 use Guard::Stat::Instance;
@@ -83,7 +83,7 @@ use Guard::Stat::Instance;
 my @values;
 BEGIN { @values = qw( total finished complete broken ) };
 
-use fields qw(time_stat results on_level), @values;
+use fields qw(guard_class time_stat results on_level), @values;
 
 =head2 new (%options)
 
@@ -110,6 +110,7 @@ sub new {
 			or croak( __PACKAGE__.": time_stat object $stat doesn't have add_data() method" );
 		$self->{time_stat} = ref $stat ? $stat : $stat->new;
 	};
+	$self->{guard_class} = $opt{guard_class} || 'Guard::Stat::Instance';
 	$self->{$_} = 0 for @values;
 
 	return $self;
@@ -179,7 +180,7 @@ sub guard {
 	my __PACKAGE__ $self = shift;
 	my %opt = @_;
 
-	return Guard::Stat::Instance->new(
+	return $self->{guard_class}->new(
 		%opt,
 		owner => $self,
 		want_time => $self->{time_stat} ? 1 : 0,
@@ -276,7 +277,7 @@ sub add_stat_new {
 
 sub add_stat_end {
 	my __PACKAGE__ $self = shift;
-	my ($guard, $result, @rest) = @_;
+	my ($result, @rest) = @_;
 	$result = "" unless defined $result;
 
 	$self->{finished}++;
@@ -290,7 +291,7 @@ sub add_stat_end {
 
 sub add_stat_destroy {
 	my $self = shift;
-	my ($guard, $is_done) = @_;
+	my ($is_done) = @_;
 
 	if ($is_done) {
 		$self->{complete}++;

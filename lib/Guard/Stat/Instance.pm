@@ -9,7 +9,7 @@ Guard::Stat::Instance - guard object base class. See L<Guard::Stat>.
 
 =cut
 
-our $VERSION = 0.0201;
+our $VERSION = 0.0202;
 
 use Carp;
 use Time::HiRes qw(time);
@@ -46,7 +46,7 @@ sub new {
 	$self->{owner} = $opt{owner};
 	$opt{want_time} and $self->{start} = time;
 
-	$self->{owner}->add_stat_new($self);
+	$self->{owner}->add_stat_new();
 	return $self;
 };
 
@@ -64,7 +64,7 @@ sub end {
 
 	if (!$self->{done}++) {
 	  return unless $self->{owner};
-		$self->{owner}->add_stat_end($self, @_);
+		$self->{owner}->add_stat_end(@_);
 		# guarantee time is only written once
 		if (defined (my $t = delete $self->{start})) {
 			$self->{owner}->add_stat_time(time - $t);
@@ -92,7 +92,7 @@ sub DESTROY {
 	my $self = shift;
 	return unless $self->{owner};
 
-	$self->{owner}->add_stat_destroy($self, $self->{done});
+	$self->{owner}->add_stat_destroy($self->{done});
 	$self->{owner}->add_stat_time(time - $self->{start})
 		if (defined $self->{start});
 };
