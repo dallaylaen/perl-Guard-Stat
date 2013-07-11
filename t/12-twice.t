@@ -3,9 +3,9 @@
 use strict;
 use Test::More tests => 9;
 
-use Guard::Stat;
+use Guard::Stats;
 
-my $G = Guard::Stat->new;
+my $G = Guard::Stats->new;
 
 my $g = $G->guard;
 
@@ -19,19 +19,19 @@ push @oldwarn, [@warn];
 
 $g->end;
 is (scalar @warn, 1, "Warning");
-like ($warn[0], qr(Guard::Stat.*end.*once), "Warn as expected(2)");
+like ($warn[0], qr(Guard::Stats.*end.*once), "Warn as expected(2)");
 push @oldwarn, [@warn];
 @warn = ();
 
 $g->end;
 is (scalar @warn, 1, "Warning");
-like ($warn[0], qr(Guard::Stat.*end.*twice), "Warn as expected(3)");
+like ($warn[0], qr(Guard::Stats.*end.*twice), "Warn as expected(3)");
 push @oldwarn, [@warn];
 @warn = ();
 
 $g->end;
 is (scalar @warn, 1, "Warning");
-like ($warn[0], qr(Guard::Stat.*end.*twice), "Warn as expected(4)");
+like ($warn[0], qr(Guard::Stats.*end.*twice), "Warn as expected(4)");
 push @oldwarn, [@warn];
 @warn = ();
 

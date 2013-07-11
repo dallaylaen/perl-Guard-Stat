@@ -5,11 +5,10 @@ use Test::More tests => 24;
 use Test::Exception;
 use Data::Dumper;
 use Time::HiRes qw(sleep);
-use Guard::Stat::Instance::Scalar;
 
-use Guard::Stat;
+use Guard::Stats;
 
-my $G = Guard::Stat->new( );
+my $G = Guard::Stats->new( );
 lives_ok {
 	$G->get_stat;
 } "get_stat() is OK on empty guard";

@@ -2,7 +2,7 @@
 
 use strict;
 
-# A semi-real example for Guard::Stat
+# A semi-real example for Guard::Stats
 # Run as `twiggy -Ilib --listen :<port> <this_file>`
 
 # Then access the script:
@@ -18,8 +18,8 @@ use strict;
 use AE;
 use YAML;
 
-use Guard::Stat;
-my $stat = Guard::Stat->new( want_times => 1 );
+use Guard::Stats;
+my $stat = Guard::Stats->new( want_times => 1 );
 
 my $app = sub {
 	my $env = shift;

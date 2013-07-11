@@ -4,17 +4,17 @@ use strict;
 use Test::More tests => 3;
 use Test::Exception;
 
-use Guard::Stat;
+use Guard::Stats;
 
 throws_ok {
-	Guard::Stat->new( time_stat => "My::Fake" );
+	Guard::Stats->new( time_stat => "My::Fake" );
 } qr(Guard::.*doesn't.*method), "Die if wrong time class";
 
-my $st1 = Guard::Stat->new( time_stat => "My::FakeTime" );
+my $st1 = Guard::Stats->new( time_stat => "My::FakeTime" );
 do { $st1->guard for 1..10; };
 is( $st1->get_stat_time->{count}, 10, "add_data called 10 times");
 
-my $st2 = Guard::Stat->new( time_stat => My::FakeTime->new );
+my $st2 = Guard::Stats->new( time_stat => My::FakeTime->new );
 do { $st2->guard for 1..15; };
 is( $st2->get_stat_time->{count}, 15, "add_data called 15 times");
 

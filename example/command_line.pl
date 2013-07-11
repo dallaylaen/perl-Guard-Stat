@@ -1,13 +1,13 @@
 #!/usr/bin/perl -w
 
-# Example of Guard::Stat
+# Example of Guard::Stats
 # usage: $0
 # Type commands [cfdsqh] to perform actions on guards and display statistics
 
 use strict;
 use Data::Dumper;
 
-use Guard::Stat;
+use Guard::Stats;
 
 my $usage = <<"EOF";
 Commands (only 1st letter counts):
@@ -19,7 +19,7 @@ Commands (only 1st letter counts):
 [h]elp
 EOF
 
-my $st = Guard::Stat->new( want_time => 1 );
+my $st = Guard::Stats->new( want_time => 1 );
 
 my %g; # guards
 my %action = (

@@ -1,11 +1,11 @@
 use strict;
 use warnings;
 
-package Guard::Stat;
+package Guard::Stats;
 
 =head1 NAME
 
-Guard::Stat - Create guard objects and gather averall usage statistics from them.
+Guard::Stats - Create guard objects and gather averall usage statistics from them.
 
 =head1 SYNOPSIS
 
@@ -15,8 +15,8 @@ and need to monitor the number of executed, not executed, and gone subrefs.
 So we put a guard into each closure to update the statistics:
 
     # in initial section
-    use Guard::Stat;
-    my $stat = Guard::Stat->new;
+    use Guard::Stats;
+    my $stat = Guard::Stats->new;
 
     # when running
     my $guard = $stat->guard;
@@ -41,12 +41,12 @@ they merely keep their master (YOU) informed.
 
 =head2 The classes
 
-Guard::Stat is a long-lived object that spawns guards and
+Guard::Stats is a long-lived object that spawns guards and
 gathers statistical information.
 
 Its public methods are guard() and various statistic getters.
 
-Guard::Stat::Instance is the guard. When it is DESTROYed, it signals the stat
+Guard::Stats::Instance is the guard. When it is DESTROYed, it signals the stat
 object which created it.
 
 Its public methods are end( [$result] ) and is_done().
@@ -75,10 +75,10 @@ See C<on_level> below.
 
 =cut
 
-our $VERSION = 0.0206;
+our $VERSION = 0.0207;
 
 use Carp;
-use Guard::Stat::Instance;
+use Guard::Stats::Instance;
 
 my @values;
 BEGIN { @values = qw( total finished complete broken ) };
@@ -110,7 +110,7 @@ sub new {
 			or croak( __PACKAGE__.": time_stat object $stat doesn't have add_data() method" );
 		$self->{time_stat} = ref $stat ? $stat : $stat->new;
 	};
-	$self->{guard_class} = $opt{guard_class} || 'Guard::Stat::Instance';
+	$self->{guard_class} = $opt{guard_class} || 'Guard::Stats::Instance';
 	$self->{$_} = 0 for @values;
 
 	return $self;
@@ -309,14 +309,14 @@ Konstantin S. Uvarin, C<< <khedin at gmail.com> >>
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-guard-stat at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Guard-Stat>.  I will be notified, and then you'll
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Guard-Stats>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
 =head1 SUPPORT
 
 You can find documentation for this module with the perldoc command.
 
-		perldoc Guard::Stat
+		perldoc Guard::Stats
 
 
 You can also look for information at:
@@ -325,23 +325,23 @@ You can also look for information at:
 
 =item * Github:
 
-L<https://github.com/dallaylaen/perl-Guard-Stat>
+L<https://github.com/dallaylaen/perl-Guard-Stats>
 
 =item * RT: CPAN's request tracker (report bugs here)
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Guard-Stat>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Guard-Stats>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/Guard-Stat>
+L<http://annocpan.org/dist/Guard-Stats>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/Guard-Stat>
+L<http://cpanratings.perl.org/d/Guard-Stats>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/Guard-Stat/>
+L<http://search.cpan.org/dist/Guard-Stats/>
 
 =back
 
@@ -376,4 +376,4 @@ See http://dev.perl.org/licenses/ for more information.
 
 =cut
 
-1; # End of Guard::Stat
+1; # End of Guard::Stats

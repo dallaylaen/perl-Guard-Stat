@@ -5,7 +5,7 @@
 use strict;
 use YAML;
 
-use Guard::Stat;
+use Guard::Stats;
 
 my $can_stat = eval {
 	require Statistics::Descriptive::LogScale;
@@ -14,7 +14,7 @@ my $can_stat = eval {
 my $size = shift || 100;
 my $iter = shift || 10**4;
 
-my $stat = Guard::Stat->new(
+my $stat = Guard::Stats->new(
 	time_stat => $can_stat && "Statistics::Descriptive::LogScale" );
 
 my @bucket;

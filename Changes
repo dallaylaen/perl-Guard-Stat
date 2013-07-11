@@ -1,4 +1,7 @@
-Revision history for Guard-Stat
+Revision history for Guard-Stats
+
+0.0205	Thu Jul 11 2013
+	* Renamed project Guard::Stat => Guard::Stats to avoid misleading stat()
 
 0.0204	Fri Jul 5 2013
 	* Major rewrite, time_stat now available extra module, methods renamed

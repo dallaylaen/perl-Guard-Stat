@@ -1,7 +1,7 @@
 Changes
 ignore.txt
-lib/Guard/Stat.pm
-lib/Guard/Stat/Instance.pm
+lib/Guard/Stats.pm
+lib/Guard/Stats/Instance.pm
 Makefile.PL
 MANIFEST
 MANIFEST.SKIP
