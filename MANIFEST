@@ -17,5 +17,5 @@ example/performance.pl
 example/command_line.pl
 t/11-time-stat.t
 t/12-twice.t
-lib/Guard/Stat/Instance/Scalar.pm
+lib/Guard/Stats/Instance/Scalar.pm
 t/13-scalar-guard.t

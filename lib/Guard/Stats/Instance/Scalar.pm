@@ -1,11 +1,11 @@
 use strict;
 use warnings;
 
-package Guard::Stat::Instance::Scalar;
+package Guard::Stats::Instance::Scalar;
 
 =head1 NAME
 
-Guard::Stat::Instance::Scalar - Guard::Stat implementation w/o hashes.
+Guard::Stats::Instance::Scalar - Guard::Stats implementation w/o hashes.
 
 head1 HOW IT WORKS
 
@@ -37,9 +37,9 @@ use Scalar::Util qw(refaddr);
 
 Return guard object. This is NOT really a constructor, as returned object's
 type will be not match the package and actually may look like
-Guard::Stat::Instance::Scalar::generated::1234567
+Guard::Stats::Instance::Scalar::generated::1234567
 
-The generated object will, however, conform to the Guard::Stat::Instance
+The generated object will, however, conform to the Guard::Stats::Instance
 interface.
 
 =cut
@@ -89,7 +89,7 @@ sub _create_class {
 			$owner->add_stat_end( @_ );
 			$$self = '';
 		} else {
-			carp( "Guard::Stat: end() called more than once (owner = $uniq)" );
+			carp( "Guard::Stats: end() called more than once (owner = $uniq)" );
 		};
 	};
 	my $is_done = sub {

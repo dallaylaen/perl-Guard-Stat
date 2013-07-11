@@ -4,17 +4,17 @@ use strict;
 use Test::More tests => 15;
 use Carp;
 
-use Guard::Stat;
-use Guard::Stat::Instance::Scalar;
+use Guard::Stats;
+use Guard::Stats::Instance::Scalar;
 
 $SIG{__WARN__} = \&Carp::confess;
 
-my $G = Guard::Stat->new( guard_class => 'Guard::Stat::Instance::Scalar' );
+my $G = Guard::Stats->new( guard_class => 'Guard::Stats::Instance::Scalar' );
 
 my $g = $G->guard;
 consistent_ok($G);
 my $class = ref $g;
-like ($class, qr(^Guard::Stat::Instance::Scalar::), "guard type is set");
+like ($class, qr(^Guard::Stats::Instance::Scalar::), "guard type is set");
 is ($G->running, 1, "1 running instance");
 ok (!$g->is_done, "is_done=0");
 
