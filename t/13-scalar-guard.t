@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
-use Test::More tests => 13;
+use Test::More tests => 15;
 use Carp;
 
 use Guard::Stat;
@@ -16,6 +16,7 @@ consistent_ok($G);
 my $class = ref $g;
 like ($class, qr(^Guard::Stat::Instance::Scalar::), "guard type is set");
 is ($G->running, 1, "1 running instance");
+ok (!$g->is_done, "is_done=0");
 
 undef $g;
 consistent_ok($G);
@@ -26,6 +27,7 @@ $g = $G->guard;
 $g->end("foo");
 consistent_ok($G);
 is (ref $g, $class, "Instance class is the same");
+ok ( $g->is_done, "is_done=1");
 is ($G->zombie, 1, "1 zombie");
 is ($G->running, 0, "0 running");
 
