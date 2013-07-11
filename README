@@ -1,6 +1,6 @@
-Guard-Stat
+Guard-Stats
 
-Guard::Stat - Guard object generator with utilisation meters.
+Guard::Stats - Guard object generator with utilisation meters.
 
 BASIC USAGE
 
@@ -8,8 +8,8 @@ Suppose we have a long-running application making heavy use of closures,
 and need to monitor the lifetimes of those. So...
 
     # in initial section
-    use Guard::Stat;
-    my $stat = Guard::Stat->new;
+    use Guard::Stats;
+    my $stat = Guard::Stats->new;
 
     # when running
     my $guard = $stat->guard;
@@ -33,7 +33,7 @@ DEST=*	total+	?	finished+
 DEST=0	alive	running	zombie
 DEST=1	dead	broken+	complete+
 
-A "+" marks values directly measured by Guard::Stat. They all are monotonous.
+A "+" marks values directly measured by Guard::Stats. They all are monotonous.
 All others are derived from these.
 
 TIME AND LEVELS
@@ -59,21 +59,21 @@ SUPPORT AND DOCUMENTATION
 After installing, you can find documentation for this module with the
 perldoc command.
 
-    perldoc Guard::Stat
+    perldoc Guard::Stats
 
 You can also look for information at:
 
     RT, CPAN's request tracker (report bugs here)
-        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Guard-Stat
+        http://rt.cpan.org/NoAuth/Bugs.html?Dist=Guard-Stats
 
     AnnoCPAN, Annotated CPAN documentation
-        http://annocpan.org/dist/Guard-Stat
+        http://annocpan.org/dist/Guard-Stats
 
     CPAN Ratings
-        http://cpanratings.perl.org/d/Guard-Stat
+        http://cpanratings.perl.org/d/Guard-Stats
 
     Search CPAN
-        http://search.cpan.org/dist/Guard-Stat/
+        http://search.cpan.org/dist/Guard-Stats/
 
 
 LICENSE AND COPYRIGHT

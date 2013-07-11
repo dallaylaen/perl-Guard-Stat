@@ -1,15 +1,15 @@
 use strict;
 use warnings;
 
-package Guard::Stat::Instance;
+package Guard::Stats::Instance;
 
 =head1 NAME
 
-Guard::Stat::Instance - guard object base class. See L<Guard::Stat>.
+Guard::Stats::Instance - guard object base class. See L<Guard::Stats>.
 
 =cut
 
-our $VERSION = 0.0203;
+our $VERSION = 0.0204;
 
 use Carp;
 use Time::HiRes qw(time);
@@ -19,13 +19,13 @@ use Time::HiRes qw(time);
 
 =head2 new (%options)
 
-Normally, new() is called by Guard::Stat->guard.
+Normally, new() is called by Guard::Stats->guard.
 
 Options may include:
 
 =over
 
-=item * owner - the calling Guard::Stat object.
+=item * owner - the calling Guard::Stats object.
 
 =item * want_time - whether to track execution times.
 
@@ -68,7 +68,7 @@ sub end {
 		};
 	} else {
 		my $msg = $self->{done} == 2 ? "once" : "twice";
-		$msg = "Guard::Stat: end() called more than $msg";
+		$msg = "Guard::Stats: end() called more than $msg";
 		carp $msg;
 	};
 };
@@ -100,7 +100,7 @@ Konstantin S. Uvarin, C<< <khedin at gmail.com> >>
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-guard-stat at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Guard-Stat>.  I will be notified, and then you'll
+the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Guard-Stats>.  I will be notified, and then you'll
 automatically be notified of progress on your bug as I make changes.
 
 
@@ -110,7 +110,7 @@ automatically be notified of progress on your bug as I make changes.
 
 You can find documentation for this module with the perldoc command.
 
-		perldoc Guard::Stat
+		perldoc Guard::Stats
 
 
 You can also look for information at:
@@ -119,19 +119,19 @@ You can also look for information at:
 
 =item * RT: CPAN's request tracker (report bugs here)
 
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Guard-Stat>
+L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Guard-Stats>
 
 =item * AnnoCPAN: Annotated CPAN documentation
 
-L<http://annocpan.org/dist/Guard-Stat>
+L<http://annocpan.org/dist/Guard-Stats>
 
 =item * CPAN Ratings
 
-L<http://cpanratings.perl.org/d/Guard-Stat>
+L<http://cpanratings.perl.org/d/Guard-Stats>
 
 =item * Search CPAN
 
-L<http://search.cpan.org/dist/Guard-Stat/>
+L<http://search.cpan.org/dist/Guard-Stats/>
 
 =back
 

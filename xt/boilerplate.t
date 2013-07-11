@@ -49,7 +49,7 @@ TODO: {
     "placeholder date/time"       => qr(Date/time)
   );
 
-  module_boilerplate_ok('lib/Guard/Stat.pm');
+  module_boilerplate_ok('lib/Guard/Stats.pm');
 
 
 }
