@@ -1,5 +1,10 @@
 Revision history for Guard-Stats
 
+0.03	Sat Jul 13 2013
+	* API renamed finished() -> done()
+	* DOC more documentation
+	* TST add custom guard class spec and test script
+
 0.0205	Thu Jul 11 2013
 	* Renamed project Guard::Stat => Guard::Stats to avoid misleading stat()
 

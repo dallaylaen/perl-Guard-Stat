@@ -18,3 +18,4 @@ example/command_line.pl
 t/11-time-stat.t
 t/12-twice.t
 TODO
+example/check_my_guard_class.t

@@ -87,7 +87,7 @@ See C<on_level> below.
 
 =cut
 
-our $VERSION = 0.0209;
+our $VERSION = 0.03;
 
 use Carp;
 use Guard::Stats::Instance;
@@ -330,6 +330,8 @@ C<owner> object with one numeric parameter. Each guard object MUST call
 add_stat_time only once.
 
 =back
+
+See C<example/check_my_guard_class.t>.
 
 =head1 Guard instance callbacks
 
