@@ -87,7 +87,7 @@ See C<on_level> below.
 
 =cut
 
-our $VERSION = 0.0208;
+our $VERSION = 0.0209;
 
 use Carp;
 use Guard::Stats::Instance;
@@ -107,6 +107,9 @@ use fields qw(guard_class time_stat results on_level), @values;
 should support C<new> and C<add_data( $number )> operations for this to work.
 Suitable candidates are L<Statistics::Descriptive::Sparse> and
 L<Statistics::Descriptive::LogScale> (both have sublinear memory usage).
+
+=item * guard_class - packge name to override default guard class. See
+"overriding guard class" below.
 
 =back
 
@@ -128,7 +131,58 @@ sub new {
 	return $self;
 };
 
-=head2 Statistics
+=head1 Creating and using guards
+
+=head2 guard( %options )
+
+Create a guard object. All options will be forwarded to the guard's new()
+"as is", except for C<owner> and C<want_time> which are reserved.
+
+As of current, the built-in guard class supports no other options, so
+supplying a hash is useless unless the guard class is redefined. See
+"overriding guard class" below. See also L<Guard::Stats::Instance> for the
+detailed description of default guard class.
+
+=cut
+
+sub guard {
+	my __PACKAGE__ $self = shift;
+	my %opt = @_;
+
+	my $g = $self->{guard_class}->new(
+		%opt,
+		owner => $self,
+		want_time => $self->{time_stat} ? 1 : 0,
+	);
+	$self->{total}++;
+	my $running = $self->running;
+	if (my $code = $self->{on_level}{$running}) {
+		$code->($running, $self);
+	};
+	return $g;
+};
+
+=head2 $guard->end( [ $result ] )
+
+Signal that action associated with the guard is over. If $result is provided,
+it is saved in a special hash (see get_stat_result() below). This can be used
+e.g. to measure the number of successful/unsuccessful actions.
+
+Calling end() a second time on the same guard will result in a warning, and
+change no counters.
+
+=head2 $guard->is_done
+
+Tell whether end() was ever called on the guard.
+
+=head2 undef $guard
+
+The guard's DESTROY() method will signal stats object that guard is gone, and
+whether it was finished before destruction.
+
+=cut
+
+=head1 Statistics
 
 The following getters represent numbers of guards in respective states:
 
@@ -180,29 +234,6 @@ sub dead {
 sub zombie {
 	my __PACKAGE__ $self = shift;
 	return $self->{done} - $self->{complete};
-};
-
-=head2 guard()
-
-Create a guard object.
-
-=cut
-
-sub guard {
-	my __PACKAGE__ $self = shift;
-	my %opt = @_;
-
-	my $g = $self->{guard_class}->new(
-		%opt,
-		owner => $self,
-		want_time => $self->{time_stat} ? 1 : 0,
-	);
-	$self->{total}++;
-	my $running = $self->running;
-	if (my $code = $self->{on_level}{$running}) {
-		$code->($running, $self);
-	};
-	return $g;
 };
 
 =head2 get_stat
@@ -266,17 +297,50 @@ sub on_level {
 	return $self;
 };
 
+=head1 Overriding guard class
+
+Custom guard classes may be used with Guard::Stats.
+
+A guard_class supplied to new() must exhibit the following properties:
+
+=over
+
+=item * It must have a new() method, accepting a hash. C<owner>=object and
+C<want_time>=0|1 parameters MUST be acceptable.
+
+=item * The object returned by new() MUST have end(), is_done() and DESTROY()
+methods.
+
+=item * end() method MUST accept one or zero parameters.
+
+=item * end() method MUST call C<add_stat_end()> with one or zero parameters
+on the C<owner> object discussed above when called for the first time.
+
+=item * end() method MUST do nothing and emit a warning if called more than
+once. It MAY die then.
+
+=item * is_done() method MUST return true if end() was ever called, and
+false otherwise.
+
+=item * DESTROY() method MUST call C<add_stat_destroy> method on C<owner>
+object with one boolean parameter equivalent to is_done() return value.
+
+=item * end() and DESTROY() methods MAY call add_stat_time() method on the
+C<owner> object with one numeric parameter. Each guard object MUST call
+add_stat_time only once.
+
+=back
 
 =head1 Guard instance callbacks
 
 The following methods are called by the guard object in different stages of
 its life. They should NOT be called directly (unless there's a need to fool
-the stat object) and are only described for people who want to extend
-the instance object.
+the stats object) and are only described for people who want to extend
+the guard object class.
 
-=head2 add_stat_end( $guard, [ $result ])
+=head2 add_stat_end( [ $result ] )
 
-=head2 add_stat_destroy( $guard, $end_was_called )
+=head2 add_stat_destroy( $end_was_called )
 
 =head2 add_stat_time( $time )
 
