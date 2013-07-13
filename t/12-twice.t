@@ -37,5 +37,5 @@ push @oldwarn, [@warn];
 
 note "warnings were: ", explain @oldwarn;
 
-is( $G->finished, 1, "Only one end() made through");
+is( $G->done, 1, "Only one end() made through");
 is_deeply( $G->get_stat_result, { '' => 1 }, "Check result stat");

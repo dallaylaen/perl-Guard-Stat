@@ -35,7 +35,7 @@ note Dumper($G->get_stat);
 nonnegative($G->get_stat);
 
 is ($G->alive, 2, "2 items alive");
-is ($G->finished, 1, "1 done");
+is ($G->done, 1, "1 done");
 
 is ($neg, 1, "on_level(-1) called once");
 
@@ -51,7 +51,7 @@ is ($neg, 1, "on_level(-1) called once");
 undef $g2;
 # note Dumper($G->get_time_stat);
 is ($G->alive, 0, "none alive");
-is ($G->finished, 1, "1 done (still)");
+is ($G->done, 1, "1 done (still)");
 is ($neg, 1, "on_level(-1) called once");
 
 note Dumper($G->get_stat);

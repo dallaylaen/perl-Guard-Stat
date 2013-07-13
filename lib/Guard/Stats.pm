@@ -37,7 +37,7 @@ monitored in a similar way.
 
 A guard is a special object that does something useful in destructor, typically
 freeing a resource or lock. These guards however don't free anything. Instead,
-they merely keep their master (YOU) informed.
+they call home to keep their master (YOU) informed.
 
 =head2 The classes
 
@@ -60,8 +60,20 @@ guards that still exist.
 Additionally, guards implement a C<end()> method which indicates that
 the action associates with the guard is complete. Typically a guard should
 be destroyed soon afterwards. The guards for which neither DESTROY nor
-end were called are considered C<running> (see below for a full list
-of statistics).
+end were called are considered C<running> (this is used in C<on_level>).
+
+The full matrix or DESTROY()/end() combinations is as follows:
+
+    DESTROY: *        0        1
+    end:*    total+   alive    dead
+    end:0    ?        running  broken+
+    end:1    done+    zombie   complete+
+
+A "+" marks values directly measured by Guard::Stats. They all happen to be
+monotonous. Other statistics are derived from these.
+
+Note that counter showing end() NOT called regardless of DESTROY() does not
+have a meaningful name (yet?).
 
 =head2 Running count callback
 
@@ -75,13 +87,13 @@ See C<on_level> below.
 
 =cut
 
-our $VERSION = 0.0207;
+our $VERSION = 0.0208;
 
 use Carp;
 use Guard::Stats::Instance;
 
 my @values;
-BEGIN { @values = qw( total finished complete broken ) };
+BEGIN { @values = qw( total done complete broken ) };
 
 use fields qw(guard_class time_stat results on_level), @values;
 
@@ -128,7 +140,7 @@ The following getters represent numbers of guards in respective states:
 
 =item * alive() - DESTROY was NOT called;
 
-=item * finished() - end() was called;
+=item * done() - end() was called;
 
 =item * complete() - both end() and DESTROY were called;
 
@@ -155,7 +167,7 @@ foreach (@values) {
 
 sub running {
 	my __PACKAGE__ $self = shift;
-	return $self->{total} - $self->{finished} - $self->{broken};
+	return $self->{total} - $self->{done} - $self->{broken};
 };
 sub alive {
 	my __PACKAGE__ $self = shift;
@@ -167,7 +179,7 @@ sub dead {
 };
 sub zombie {
 	my __PACKAGE__ $self = shift;
-	return $self->{finished} - $self->{complete};
+	return $self->{done} - $self->{complete};
 };
 
 =head2 guard()
@@ -204,7 +216,7 @@ sub get_stat {
 	my %ret;
 	$ret{$_} = $self->{$_} for @values;
 	$ret{dead} = $ret{complete} + $ret{broken};
-	$ret{zombie} = $ret{finished} - $ret{complete};
+	$ret{zombie} = $ret{done} - $ret{complete};
 	$ret{alive} = $ret{total} - $ret{dead};
 	$ret{running} = $ret{alive} - $ret{zombie};
 
@@ -275,7 +287,7 @@ sub add_stat_end {
 	my ($result, @rest) = @_;
 	$result = "" unless defined $result;
 
-	$self->{finished}++;
+	$self->{done}++;
 	$self->{results}{$result}++;
 
 	my $running = $self->running;

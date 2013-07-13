@@ -28,13 +28,13 @@ METER TABLE
 Statistics show numbers of guards for which end()/DESTROY() were called
 in various combinations.
 
-	fin=*	fin=0	fin=1
-DEST=*	total+	?	finished+
-DEST=0	alive	running	zombie
-DEST=1	dead	broken+	complete+
+    DESTROY: *        0        1
+    end:*    total+   alive    dead
+    end:0    ?        running  broken+
+    end:1    done+    zombie   complete+
 
 A "+" marks values directly measured by Guard::Stats. They all are monotonous.
-All others are derived from these.
+Other counterss are derived from these.
 
 TIME AND LEVELS
 
